@@ -2,6 +2,7 @@
 import { assert } from "./util.js";
 
 const A85_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+=-_,:;~/?[]@!$&()*{}|^';
+export const SHARE_DATA_V4_A85_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+=-_,:;~/?[]@!$&*{}|^'.";
 
 export function btoa(d: Uint8Array, byteLength: number = d.byteLength, charset: string = A85_CHARS, chunk = ['0', '0', '0', '0', '0']): string {
     assert(charset.length === 85);

@@ -1,7 +1,7 @@
 
 import { mat4, quat, ReadonlyMat4 } from "gl-matrix";
 import ArrayBufferSlice from "./ArrayBufferSlice";
-import { atob, btoa } from "./Ascii85";
+import { atob, btoa, SHARE_DATA_V4_A85_CHARS } from "./Ascii85";
 import { Mat4Identity, MathConstants, Vec3UnitX, Vec3UnitY } from "./MathHelpers";
 import { assert } from "./util";
 
@@ -160,8 +160,8 @@ export class SaveStateSerializer {
         return true;
     }
 
-    private loadSaveStateV3(dst: SaveState, state: string): boolean {
-        const byteLength = atob(this._saveStateTmp, 0, state);
+    private loadSaveStateV3(dst: SaveState, state: string, charset?: string): boolean {
+        const byteLength = atob(this._saveStateTmp, 0, state, charset);
 
         let byteOffs = 0;
         const optionsBits = this._saveStateView.getUint8(byteOffs + 0x00);
@@ -188,6 +188,9 @@ export class SaveStateSerializer {
         // Version 2 starts with ZNCA8, which is Ascii85 for 'NC\0\0'
         if (str.startsWith('ZNCA8') && str.endsWith('='))
             return this.loadSaveStateV2(dst, str.slice(5, -1));
+
+        if (str.startsWith('ShareData=V4:'))
+            return this.loadSaveStateV3(dst, str.slice(13), SHARE_DATA_V4_A85_CHARS);
 
         // Version 3 starts with 'A' and has no '=' at the end.
         if (str.startsWith('A'))
@@ -231,7 +234,7 @@ export class SaveStateSerializer {
 
         this._saveStateView.setUint8(0, optionsBits);
 
-        const s = btoa(this._saveStateTmp, byteOffs);
-        return `ShareData=${s}`;
+        const s = btoa(this._saveStateTmp, byteOffs, SHARE_DATA_V4_A85_CHARS);
+        return `ShareData=V4:${s}`;
     }
 }
